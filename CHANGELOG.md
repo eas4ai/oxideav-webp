@@ -40,6 +40,15 @@ All notable changes to `oxideav-webp` are recorded here.
   callback, and the frequency count, exact cost and writer of a
   spatially-coded image take any token stream, so a parse no longer has
   to be stored as a `Vec<Token>`.
+- The lossy path copies the `VP8 ` bitstream into the RIFF container
+  once. `build_webp_file` writes its chunks straight into the file
+  instead of building each chunk and copying it again (a 100,001-byte
+  bitstream now allocates about 100 KB instead of 200 KB), and the
+  extended lossy layout (`VP8X` with `ALPH` or metadata) appends every
+  chunk into one buffer instead of building a body and framing it (three
+  copies of the bitstream down to one). The output bytes are unchanged:
+  `tests/lossy_output_pins.rs` pins every fixture's quality-80 encode,
+  two photo-like images and the `webp_vp8` framework encoder's packet.
 
 ### Added
 
@@ -78,6 +87,13 @@ All notable changes to `oxideav-webp` are recorded here.
   - A unit test pins the single-pass planner token for token to the
     exhaustive path's planner on three images without a cache and with
     3- and 10-bit caches.
+- `encoder_vp8::Vp8LossyEncoder`, the lossy (`VP8 `) still encoder with
+  a direct constructor (`with_quality`, `with_qindex`): it needs neither
+  the `registry` feature nor a framework `Encoder`. `encode_yuv420`
+  reads a 4:2:0 picture's planes in place at the caller's strides and
+  writes a simple-lossy `.webp`, byte-identical to the `webp_vp8`
+  framework encoder's packet for the same picture and quality (a test
+  pins it, padded rows included).
 
 ### Notes
 
