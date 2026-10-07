@@ -48,6 +48,13 @@ fn photo_rgba(width: u32, height: u32) -> Vec<u8> {
 
 /// `(fixture, length, FNV-1a 64)` of the first frame of every committed
 /// fixture, encoded at quality 80 with its metadata.
+///
+/// The alpha plane is coded with the default lossless method, so
+/// `lossy-with-alpha-128x128` moved when the single-pass encoder became
+/// the default: from 2,926 bytes (`0xa98113323bfcf060`) to 3,020. Its
+/// `VP8X` and `VP8 ` chunks are unchanged; only the `ALPH` payload grew,
+/// from 1,649 to 1,743 bytes, and the same image encoded with `method` 6
+/// still gives the old 2,926 bytes.
 const FIXTURE_PINS: &[(&str, usize, u64)] = &[
     ("animated-3-frames-rgb.webp", 674, 0x18457de5aca0d009),
     ("animated-with-alpha.webp", 674, 0x18457de5aca0d009),
@@ -67,7 +74,7 @@ const FIXTURE_PINS: &[(&str, usize, u64)] = &[
     ("lossless-cross-color-active.webp", 206, 0x5ec88d90d5a19a3c),
     ("lossy-1x1.webp", 58, 0x9f844a7d819ec54e),
     ("lossy-near-lossless-q40.webp", 1260, 0x10417e2004277fa4),
-    ("lossy-with-alpha-128x128.webp", 2926, 0xa98113323bfcf060),
+    ("lossy-with-alpha-128x128.webp", 3020, 0xf01ec48af7e6a4ab),
 ];
 
 fn assert_pin(what: &str, out: &[u8], len: usize, hash: u64) {
